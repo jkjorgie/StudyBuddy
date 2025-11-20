@@ -82,14 +82,17 @@ app.get(
 */
 
 // Start server
-mongodb.initDb((err, mongodb) => {
+mongodb.initDb((err) => {
   if (err) {
     console.log(err);
   } else {
     app.listen(port, () => {
-      console.log(`Study Buddy APIlistening on port ${port}`);
+      console.log(`Study Buddy API listening on port ${port}`);
       console.log(`Server running at http://localhost:${port}`);
     });
+
+    // Ping database to verify connection
+    mongodb.pingDatabase();
   }
 });
 
