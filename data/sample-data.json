@@ -1,0 +1,120 @@
+{
+  "users": [
+    {
+      "name": "John Smith",
+      "emailAddress": "john.smith@example.com"
+    },
+    {
+      "name": "Sarah Johnson",
+      "emailAddress": "sarah.johnson@example.com"
+    },
+    {
+      "name": "Michael Chen",
+      "emailAddress": "michael.chen@example.com"
+    }
+  ],
+  "courses": [
+    {
+      "courseName": "Introduction to Computer Science",
+      "courseDescription": "Fundamental concepts of programming and computational thinking",
+      "courseSchedule": ["Monday", "Wednesday", "Friday"],
+      "instructorName": "Dr. Emily Roberts",
+      "subject": "Computer Science",
+      "startDate": "2025-01-15",
+      "endDate": "2025-05-10",
+      "userId": "691e9c6c334999dee4d5d70e"
+    },
+    {
+      "courseName": "Data Structures and Algorithms",
+      "courseDescription": "Advanced study of data structures, algorithms, and their applications",
+      "courseSchedule": ["Tuesday", "Thursday"],
+      "instructorName": "Prof. James Anderson",
+      "subject": "Computer Science",
+      "startDate": "2025-01-16",
+      "endDate": "2025-05-11",
+      "userId": "691e9c6c334999dee4d5d70e"
+    },
+    {
+      "courseName": "Calculus II",
+      "courseDescription": "Integration techniques, series, and multivariable calculus",
+      "courseSchedule": ["Monday", "Wednesday", "Friday"],
+      "instructorName": "Dr. Lisa Martinez",
+      "subject": "Mathematics",
+      "startDate": "2025-01-15",
+      "endDate": "2025-05-10",
+      "userId": "691e9c6c334999dee4d5d70e"
+    }
+  ],
+  "studySessions": [
+    {
+      "courseId": "691e9cd6334999dee4d5d712",
+      "length": 120,
+      "description": "Reviewed recursion concepts and practiced coding problems",
+      "studySessionRating": 4,
+      "userId": "691e9c6c334999dee4d5d70e"
+    },
+    {
+      "courseId": "691e9cd6334999dee4d5d712",
+      "length": 90,
+      "description": "Studied binary search trees and implemented basic operations",
+      "studySessionRating": 5,
+      "userId": "691e9c6c334999dee4d5d70e"
+    },
+    {
+      "courseId": "691e9cd6334999dee4d5d712",
+      "length": 60,
+      "description": "Quick review of loops and conditionals before exam",
+      "studySessionRating": 3,
+      "userId": "691e9c6c334999dee4d5d70e"
+    },
+    {
+      "courseId": "691e9cd6334999dee4d5d712",
+      "length": 150,
+      "description": "Worked through integration by parts and trigonometric substitution problems",
+      "studySessionRating": 4,
+      "userId": "691e9c6c334999dee4d5d70e"
+    }
+  ],
+  "tasks": [
+    {
+      "courseId": "REPLACE_WITH_COURSE_OBJECTID",
+      "taskDescription": "Complete programming assignment on linked lists",
+      "taskDifficultyRating": 3,
+      "taskTimeEstimate": 180,
+      "taskTimeActual": 210,
+      "userId": "691e9c6c334999dee4d5d70e"
+    },
+    {
+      "courseId": "REPLACE_WITH_COURSE_OBJECTID",
+      "taskDescription": "Study for midterm exam covering sorting algorithms",
+      "taskDifficultyRating": 4,
+      "taskTimeEstimate": 240,
+      "taskTimeActual": 270,
+      "userId": "691e9c6c334999dee4d5d70e"
+    },
+    {
+      "courseId": "REPLACE_WITH_COURSE_OBJECTID",
+      "taskDescription": "Read chapters 5-6 on object-oriented programming",
+      "taskDifficultyRating": 2,
+      "taskTimeEstimate": 90,
+      "taskTimeActual": 85,
+      "userId": "691e9c6c334999dee4d5d70e"
+    },
+    {
+      "courseId": "REPLACE_WITH_COURSE_OBJECTID",
+      "taskDescription": "Complete homework problems on series convergence",
+      "taskDifficultyRating": 5,
+      "taskTimeEstimate": 120,
+      "taskTimeActual": 180,
+      "userId": "691e9c6c334999dee4d5d70e"
+    },
+    {
+      "courseId": "REPLACE_WITH_COURSE_OBJECTID",
+      "taskDescription": "Implement a hash table with collision handling",
+      "taskDifficultyRating": 4,
+      "taskTimeEstimate": 200,
+      "taskTimeActual": 195,
+      "userId": "691e9c6c334999dee4d5d70e"
+    }
+  ]
+}

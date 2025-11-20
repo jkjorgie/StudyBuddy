@@ -1,0 +1,33 @@
+{
+  "name": "studybuddy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jkjorgie/StudyBuddy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jkjorgie/StudyBuddy/issues"
+  },
+  "homepage": "https://github.com/jkjorgie/StudyBuddy#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "mongodb": "^7.0.0",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12",
+    "swagger": "^0.7.5",
+    "swagger-ui-express": "^5.0.1"
+  }
+}
