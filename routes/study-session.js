@@ -8,7 +8,7 @@ const { ObjectId } = require("mongodb");
 router.get("/", async (req, res) => {
   try {
     const db = getDatabase().db();
-    const sessions = await db.collection("studySessions").find().toArray();
+    const sessions = await db.collection("study_sessions").find().toArray();
     res.status(200).json(sessions);
   } catch (err) {
     console.error("Error getting study sessions:", err);
@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /study-session/:sessionId (single session)
+// GET /study-session/:sessionId
 router.get("/:sessionId", async (req, res) => {
   const { sessionId } = req.params;
 
@@ -27,7 +27,7 @@ router.get("/:sessionId", async (req, res) => {
   try {
     const db = getDatabase().db();
     const session = await db
-      .collection("studySessions")
+      .collection("study_sessions")
       .findOne({ _id: new ObjectId(sessionId) });
 
     if (!session) {
@@ -41,7 +41,7 @@ router.get("/:sessionId", async (req, res) => {
   }
 });
 
-// POST /study-session (create session)
+// POST /study-session
 router.post("/", async (req, res) => {
   try {
     const {
@@ -67,7 +67,7 @@ router.post("/", async (req, res) => {
     };
 
     const db = getDatabase().db();
-    const result = await db.collection("studySessions").insertOne(newSession);
+    const result = await db.collection("study_sessions").insertOne(newSession);
 
     res.status(201).json({ _id: result.insertedId, ...newSession });
   } catch (err) {
@@ -76,7 +76,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// PUT /study-session/:sessionId (update session)
+// PUT /study-session/:sessionId
 router.put("/:sessionId", async (req, res) => {
   const { sessionId } = req.params;
 
@@ -94,7 +94,7 @@ router.put("/:sessionId", async (req, res) => {
 
     const db = getDatabase().db();
     const result = await db
-      .collection("studySessions")
+      .collection("study_sessions")
       .updateOne({ _id: new ObjectId(sessionId) }, { $set: updateDoc });
 
     if (result.matchedCount === 0) {
@@ -102,7 +102,7 @@ router.put("/:sessionId", async (req, res) => {
     }
 
     const updatedSession = await db
-      .collection("studySessions")
+      .collection("study_sessions")
       .findOne({ _id: new ObjectId(sessionId) });
 
     res.status(200).json(updatedSession);
@@ -112,7 +112,7 @@ router.put("/:sessionId", async (req, res) => {
   }
 });
 
-// DELETE /study-session/:sessionId (delete session)
+// DELETE /study-session/:sessionId
 router.delete("/:sessionId", async (req, res) => {
   const { sessionId } = req.params;
 
@@ -123,7 +123,7 @@ router.delete("/:sessionId", async (req, res) => {
   try {
     const db = getDatabase().db();
     const result = await db
-      .collection("studySessions")
+      .collection("study_sessions")
       .deleteOne({ _id: new ObjectId(sessionId) });
 
     if (result.deletedCount === 0) {
@@ -134,6 +134,32 @@ router.delete("/:sessionId", async (req, res) => {
   } catch (err) {
     console.error("Error deleting study session:", err);
     res.status(500).json({ message: "Failed to delete study session" });
+  }
+});
+
+// DEBUG: see what the server sees
+router.get("/debug/internal", async (req, res) => {
+  try {
+    const db = getDatabase().db();
+    const collections = await db.listCollections().toArray();
+    const countSnake = await db
+      .collection("study_sessions")
+      .countDocuments()
+      .catch(() => -1);
+    const countCamel = await db
+      .collection("studySessions")
+      .countDocuments()
+      .catch(() => -1);
+
+    res.json({
+      dbName: db.databaseName,
+      collections: collections.map((c) => c.name),
+      study_sessions_count: countSnake,
+      studySessions_count: countCamel,
+    });
+  } catch (err) {
+    console.error("Debug error:", err);
+    res.status(500).json({ message: "Debug failed", error: err.message });
   }
 });
 
