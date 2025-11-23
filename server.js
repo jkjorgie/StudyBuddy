@@ -1,3 +1,4 @@
+//server.js
 const express = require("express");
 const mongodb = require("./data/database");
 const app = express();
@@ -11,6 +12,10 @@ const cors = require("cors");
 
 // middlewares
 app.use(bodyParser.json());
+app.use(cors({ origin: "*", methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"] }));
+
+// mount all API routes
+app.use("/", routes);
 /*
 app.use(
   session({

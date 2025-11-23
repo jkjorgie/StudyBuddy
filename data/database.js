@@ -1,3 +1,4 @@
+//data/database.js
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -37,27 +38,27 @@ const pingDatabase = async () => {
 
     // Ping the database to verify connection
     const pingResult = await database.db().admin().ping();
-    console.log("✓ Database ping successful:", pingResult);
+    console.log("Database ping successful:", pingResult);
 
     // Check if users collection exists and is accessible
     const db = database.db();
     const collections = await db.listCollections({ name: "users" }).toArray();
 
     if (collections.length > 0) {
-      console.log("✓ Users collection found and accessible");
+      console.log("Users collection found and accessible");
     } else {
       console.log(
-        "⚠ Users collection not found (will be created on first insert)"
+        "Users collection not found (will be created on first insert)"
       );
     }
 
     // Try to count documents in users collection
     const count = await db.collection("users").countDocuments();
-    console.log(`✓ Users collection has ${count} document(s)`);
+    console.log(`Users collection has ${count} document(s)`);
 
     return true;
   } catch (err) {
-    console.error("✗ Database ping failed:", err.message);
+    console.error("Database ping failed:", err.message);
     return false;
   }
 };

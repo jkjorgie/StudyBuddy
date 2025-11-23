@@ -1,1 +1,704 @@
-{}
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Study Buddy API",
+    "version": "1.0.0",
+    "description": "API for tracking study sessions, courses, tasks, and users."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local dev server"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": ["General"],
+        "summary": "API status",
+        "responses": {
+          "200": {
+            "description": "API status and metadata"
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get all users",
+        "responses": {
+          "200": {
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/User" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["User"],
+        "summary": "Create a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/user/{userId}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get a single user",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "User ID (MongoDB ObjectId)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "User not found" }
+        }
+      },
+      "put": {
+        "tags": ["User"],
+        "summary": "Update a user",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UserUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "400": { "description": "Invalid input or ID" },
+          "404": { "description": "User not found" }
+        }
+      },
+      "delete": {
+        "tags": ["User"],
+        "summary": "Delete a user",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "User deleted" },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "User not found" }
+        }
+      }
+    },
+    "/course": {
+      "get": {
+        "tags": ["Course"],
+        "summary": "Get all courses",
+        "responses": {
+          "200": {
+            "description": "List of courses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Course" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Course"],
+        "summary": "Create a new course",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CourseCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Course created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Course" }
+              }
+            }
+          },
+          "400": { "description": "Invalid input" }
+        }
+      }
+    },
+    "/course/{courseId}": {
+      "get": {
+        "tags": ["Course"],
+        "summary": "Get a single course",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Course" }
+              }
+            }
+          },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "Course not found" }
+        }
+      },
+      "put": {
+        "tags": ["Course"],
+        "summary": "Update a course",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CourseUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Course updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Course" }
+              }
+            }
+          },
+          "400": { "description": "Invalid input or ID" },
+          "404": { "description": "Course not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Course"],
+        "summary": "Delete a course",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Course deleted" },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "Course not found" }
+        }
+      }
+    },
+    "/study-session": {
+      "get": {
+        "tags": ["StudySession"],
+        "summary": "Get all study sessions",
+        "responses": {
+          "200": {
+            "description": "List of study sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/StudySession" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["StudySession"],
+        "summary": "Create a new study session",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudySessionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Study session created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudySession" }
+              }
+            }
+          },
+          "400": { "description": "Invalid input" }
+        }
+      }
+    },
+    "/study-session/{sessionId}": {
+      "get": {
+        "tags": ["StudySession"],
+        "summary": "Get a single study session",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Study session found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudySession" }
+              }
+            }
+          },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "Study session not found" }
+        }
+      },
+      "put": {
+        "tags": ["StudySession"],
+        "summary": "Update a study session",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StudySessionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Study session updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StudySession" }
+              }
+            }
+          },
+          "400": { "description": "Invalid input or ID" },
+          "404": { "description": "Study session not found" }
+        }
+      },
+      "delete": {
+        "tags": ["StudySession"],
+        "summary": "Delete a study session",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Study session deleted" },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "Study session not found" }
+        }
+      }
+    },
+    "/task": {
+      "get": {
+        "tags": ["Task"],
+        "summary": "Get all tasks (optionally filtered by userId)",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Filter tasks by user ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tasks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Task" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Task"],
+        "summary": "Create a new task",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TaskCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Task" }
+              }
+            }
+          },
+          "400": { "description": "Invalid input" }
+        }
+      }
+    },
+    "/task/{taskId}": {
+      "get": {
+        "tags": ["Task"],
+        "summary": "Get a single task",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Task" }
+              }
+            }
+          },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "Task not found" }
+        }
+      },
+      "put": {
+        "tags": ["Task"],
+        "summary": "Update a task",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TaskUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Task" }
+              }
+            }
+          },
+          "400": { "description": "Invalid input or ID" },
+          "404": { "description": "Task not found" }
+        }
+      },
+      "delete": {
+        "tags": ["Task"],
+        "summary": "Delete a task",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Task deleted" },
+          "400": { "description": "Invalid ID" },
+          "404": { "description": "Task not found" }
+        }
+      }
+    },
+    "/task/course/{courseId}": {
+      "get": {
+        "tags": ["Task"],
+        "summary": "Get all tasks for a course",
+        "parameters": [
+          {
+            "name": "courseId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tasks for the course",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Task" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string", "example": "691e9c6c334999dee4d5d70e" },
+          "name": { "type": "string", "example": "John Smith" },
+          "emailAddress": {
+            "type": "string",
+            "example": "john.smith@example.com"
+          }
+        }
+      },
+      "UserCreate": {
+        "type": "object",
+        "required": ["name", "emailAddress"],
+        "properties": {
+          "name": { "type": "string" },
+          "emailAddress": { "type": "string", "format": "email" }
+        }
+      },
+      "UserUpdate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "emailAddress": { "type": "string", "format": "email" }
+        }
+      },
+      "Course": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "courseName": { "type": "string" },
+          "courseDescription": { "type": "string" },
+          "courseSchedule": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "instructorName": { "type": "string" },
+          "subject": { "type": "string" },
+          "startDate": { "type": "string", "format": "date" },
+          "endDate": { "type": "string", "format": "date" },
+          "userId": { "type": "string" }
+        }
+      },
+      "CourseCreate": {
+        "type": "object",
+        "required": ["courseName", "startDate", "endDate"],
+        "properties": {
+          "courseName": { "type": "string" },
+          "courseDescription": { "type": "string" },
+          "courseSchedule": {
+            "type": "array",
+            "items": { "type": "string" },
+            "example": ["Monday", "Wednesday"]
+          },
+          "instructorName": { "type": "string" },
+          "subject": { "type": "string" },
+          "startDate": { "type": "string", "format": "date" },
+          "endDate": { "type": "string", "format": "date" },
+          "userId": { "type": "string" }
+        }
+      },
+      "CourseUpdate": {
+        "type": "object",
+        "properties": {
+          "courseName": { "type": "string" },
+          "courseDescription": { "type": "string" },
+          "courseSchedule": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "instructorName": { "type": "string" },
+          "subject": { "type": "string" },
+          "startDate": { "type": "string", "format": "date" },
+          "endDate": { "type": "string", "format": "date" },
+          "userId": { "type": "string" }
+        }
+      },
+      "StudySession": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "courseId": { "type": "string" },
+          "length": { "type": "integer", "description": "Minutes" },
+          "description": { "type": "string" },
+          "studySessionRating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "userId": { "type": "string" }
+        }
+      },
+      "StudySessionCreate": {
+        "type": "object",
+        "required": ["courseId", "length"],
+        "properties": {
+          "courseId": { "type": "string" },
+          "length": { "type": "integer" },
+          "description": { "type": "string" },
+          "studySessionRating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "userId": { "type": "string" }
+        }
+      },
+      "StudySessionUpdate": {
+        "type": "object",
+        "properties": {
+          "courseId": { "type": "string" },
+          "length": { "type": "integer" },
+          "description": { "type": "string" },
+          "studySessionRating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "userId": { "type": "string" }
+        }
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "courseId": { "type": "string" },
+          "taskDescription": { "type": "string" },
+          "taskDifficultyRating": { "type": "integer" },
+          "taskTimeEstimate": {
+            "type": "integer",
+            "description": "Estimated time in minutes"
+          },
+          "taskTimeActual": {
+            "type": "integer",
+            "description": "Actual time in minutes"
+          },
+          "userId": { "type": "string" }
+        }
+      },
+      "TaskCreate": {
+        "type": "object",
+        "required": ["courseId", "taskDescription"],
+        "properties": {
+          "courseId": { "type": "string" },
+          "taskDescription": { "type": "string" },
+          "taskDifficultyRating": { "type": "integer" },
+          "taskTimeEstimate": { "type": "integer" },
+          "taskTimeActual": { "type": "integer" },
+          "userId": { "type": "string" }
+        }
+      },
+      "TaskUpdate": {
+        "type": "object",
+        "properties": {
+          "courseId": { "type": "string" },
+          "taskDescription": { "type": "string" },
+          "taskDifficultyRating": { "type": "integer" },
+          "taskTimeEstimate": { "type": "integer" },
+          "taskTimeActual": { "type": "integer" },
+          "userId": { "type": "string" }
+        }
+      }
+    }
+  }
+}
