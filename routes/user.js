@@ -1,132 +1,52 @@
 // routes/user.js
 const express = require("express");
 const router = express.Router();
-const { getDatabase } = require("../data/database");
-const { ObjectId } = require("mongodb");
+const userController = require("../controllers/user");
+const { handleRouteError } = require("./handleError");
 
-// GET /user (all users)
+// GET /user
 router.get("/", async (req, res) => {
   try {
-    const db = getDatabase().db();
-    const users = await db.collection("users").find().toArray();
-    res.status(200).json(users);
+    await userController.getAllUsers(req, res);
   } catch (err) {
-    console.error("Error getting users:", err);
-    res.status(500).json({ message: "Failed to fetch users" });
+    handleRouteError(err, res);
   }
 });
 
-// GET /user/:userId (single user)
+// GET /user/:userId
 router.get("/:userId", async (req, res) => {
-  const { userId } = req.params;
-
-  if (!ObjectId.isValid(userId)) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
   try {
-    const db = getDatabase().db();
-    const user = await db
-      .collection("users")
-      .findOne({ _id: new ObjectId(userId) });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.status(200).json(user);
+    await userController.getUserById(req, res);
   } catch (err) {
-    console.error("Error getting user:", err);
-    res.status(500).json({ message: "Failed to fetch user" });
+    handleRouteError(err, res);
   }
 });
 
-// POST /user (create user)
+// POST /user
 router.post("/", async (req, res) => {
   try {
-    const { name, emailAddress } = req.body;
-
-    if (!name || !emailAddress) {
-      return res
-        .status(400)
-        .json({ message: "name and emailAddress are required" });
-    }
-
-    const db = getDatabase().db();
-    const newUser = { name, emailAddress };
-    const result = await db.collection("users").insertOne(newUser);
-
-    res.status(201).json({ _id: result.insertedId, ...newUser });
+    await userController.createUser(req, res);
   } catch (err) {
-    console.error("Error creating user:", err);
-    res.status(500).json({ message: "Failed to create user" });
+    handleRouteError(err, res);
   }
 });
 
-// PUT /user/:userId (update user)
+// PUT /user/:userId
 router.put("/:userId", async (req, res) => {
-  const { userId } = req.params;
-
-  if (!ObjectId.isValid(userId)) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
   try {
-    const { name, emailAddress } = req.body;
-
-    const updateDoc = {
-      ...(name && { name }),
-      ...(emailAddress && { emailAddress }),
-    };
-
-    if (Object.keys(updateDoc).length === 0) {
-      return res.status(400).json({ message: "No valid fields to update" });
-    }
-
-    const db = getDatabase().db();
-    const result = await db
-      .collection("users")
-      .updateOne({ _id: new ObjectId(userId) }, { $set: updateDoc });
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const updatedUser = await db
-      .collection("users")
-      .findOne({ _id: new ObjectId(userId) });
-
-    res.status(200).json(updatedUser);
+    await userController.updateUser(req, res);
   } catch (err) {
-    console.error("Error updating user:", err);
-    res.status(500).json({ message: "Failed to update user" });
+    handleRouteError(err, res);
   }
 });
 
-// DELETE /user/:userId (delete user)
+// DELETE /user/:userId
 router.delete("/:userId", async (req, res) => {
-  const { userId } = req.params;
-
-  if (!ObjectId.isValid(userId)) {
-    return res.status(400).json({ message: "Invalid user ID" });
-  }
-
   try {
-    const db = getDatabase().db();
-    const result = await db
-      .collection("users")
-      .deleteOne({ _id: new ObjectId(userId) });
-
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.sendStatus(204);
+    await userController.deleteUser(req, res);
   } catch (err) {
-    console.error("Error deleting user:", err);
-    res.status(500).json({ message: "Failed to delete user" });
+    handleRouteError(err, res);
   }
 });
 
 module.exports = router;
-

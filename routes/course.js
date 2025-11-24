@@ -1,144 +1,51 @@
 // routes/course.js
 const express = require("express");
 const router = express.Router();
-const { getDatabase } = require("../data/database");
-const { ObjectId } = require("mongodb");
+const courseController = require("../controllers/course");
+const { handleRouteError } = require("./handleError");
 
-// GET /course (all courses)
+// GET /course
 router.get("/", async (req, res) => {
   try {
-    const db = getDatabase().db();
-    const courses = await db.collection("courses").find().toArray();
-    res.status(200).json(courses);
+    await courseController.getAllCourses(req, res);
   } catch (err) {
-    console.error("Error getting courses:", err);
-    res.status(500).json({ message: "Failed to fetch courses" });
+    handleRouteError(err, res);
   }
 });
 
-// GET /course/:courseId (single course)
+// GET /course/:courseId
 router.get("/:courseId", async (req, res) => {
-  const { courseId } = req.params;
-
-  if (!ObjectId.isValid(courseId)) {
-    return res.status(400).json({ message: "Invalid course ID" });
-  }
-
   try {
-    const db = getDatabase().db();
-    const course = await db
-      .collection("courses")
-      .findOne({ _id: new ObjectId(courseId) });
-
-    if (!course) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-
-    res.status(200).json(course);
+    await courseController.getCourseById(req, res);
   } catch (err) {
-    console.error("Error getting course:", err);
-    res.status(500).json({ message: "Failed to fetch course" });
+    handleRouteError(err, res);
   }
 });
 
-// POST /course (create course)
+// POST /course
 router.post("/", async (req, res) => {
   try {
-    const {
-      courseName,
-      courseDescription,
-      courseSchedule,
-      instructorName,
-      subject,
-      startDate,
-      endDate,
-    } = req.body;
-
-    if (!courseName || !startDate || !endDate) {
-      return res.status(400).json({
-        message: "courseName, startDate, and endDate are required",
-      });
-    }
-
-    const newCourse = {
-      courseName,
-      courseDescription,
-      courseSchedule,
-      instructorName,
-      subject,
-      startDate,
-      endDate,
-      userId,
-    };
-
-    const db = getDatabase().db();
-    const result = await db.collection("courses").insertOne(newCourse);
-
-    res.status(201).json({ _id: result.insertedId, ...newCourse });
+    await courseController.createCourse(req, res);
   } catch (err) {
-    console.error("Error creating course:", err);
-    res.status(500).json({ message: "Failed to create course" });
+    handleRouteError(err, res);
   }
 });
 
-// PUT /course/:courseId (update course)
+// PUT /course/:courseId
 router.put("/:courseId", async (req, res) => {
-  const { courseId } = req.params;
-
-  if (!ObjectId.isValid(courseId)) {
-    return res.status(400).json({ message: "Invalid course ID" });
-  }
-
   try {
-    const updateDoc = { ...req.body };
-    delete updateDoc._id;
-
-    if (Object.keys(updateDoc).length === 0) {
-      return res.status(400).json({ message: "No valid fields to update" });
-    }
-
-    const db = getDatabase().db();
-    const result = await db
-      .collection("courses")
-      .updateOne({ _id: new ObjectId(courseId) }, { $set: updateDoc });
-
-    if (result.matchedCount === 0) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-
-    const updatedCourse = await db
-      .collection("courses")
-      .findOne({ _id: new ObjectId(courseId) });
-
-    res.status(200).json(updatedCourse);
+    await courseController.updateCourse(req, res);
   } catch (err) {
-    console.error("Error updating course:", err);
-    res.status(500).json({ message: "Failed to update course" });
+    handleRouteError(err, res);
   }
 });
 
-// DELETE /course/:courseId (delete course)
+// DELETE /course/:courseId
 router.delete("/:courseId", async (req, res) => {
-  const { courseId } = req.params;
-
-  if (!ObjectId.isValid(courseId)) {
-    return res.status(400).json({ message: "Invalid course ID" });
-  }
-
   try {
-    const db = getDatabase().db();
-    const result = await db
-      .collection("courses")
-      .deleteOne({ _id: new ObjectId(courseId) });
-
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "Course not found" });
-    }
-
-    res.sendStatus(204);
+    await courseController.deleteCourse(req, res);
   } catch (err) {
-    console.error("Error deleting course:", err);
-    res.status(500).json({ message: "Failed to delete course" });
+    handleRouteError(err, res);
   }
 });
 
