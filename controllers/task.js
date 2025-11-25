@@ -1,7 +1,12 @@
 // controllers/task.js
 const { getDatabase } = require("../data/database");
 const { ObjectId } = require("mongodb");
-const { createError } = require("./utils");
+const {
+  createError,
+  isValidRating,
+  isPositiveNumber,
+  sanitizeString,
+} = require("./utils");
 
 // GET /task (optionally ?userId=...)
 exports.getAllTasks = async (req, res) => {
@@ -56,18 +61,88 @@ exports.createTask = async (req, res) => {
     userId,
   } = req.body;
 
+  // Validate required fields
   if (!courseId || !taskDescription) {
     throw createError(400, "courseId and taskDescription are required");
   }
 
+  // Validate courseId
+  if (typeof courseId !== "string" || courseId.trim().length === 0) {
+    throw createError(400, "courseId must be a non-empty string");
+  }
+
+  // Validate taskDescription
+  if (typeof taskDescription !== "string") {
+    throw createError(400, "taskDescription must be a string");
+  }
+
+  const sanitizedDescription = sanitizeString(taskDescription);
+  if (sanitizedDescription.length < 3 || sanitizedDescription.length > 500) {
+    throw createError(
+      400,
+      "taskDescription must be between 3 and 500 characters"
+    );
+  }
+
+  // Validate taskDifficultyRating if provided (1-5)
+  if (taskDifficultyRating !== undefined) {
+    if (!isValidRating(taskDifficultyRating)) {
+      throw createError(
+        400,
+        "taskDifficultyRating must be an integer between 1 and 5"
+      );
+    }
+  }
+
+  // Validate taskTimeEstimate if provided (in minutes)
+  if (taskTimeEstimate !== undefined) {
+    if (
+      typeof taskTimeEstimate !== "number" ||
+      !isPositiveNumber(taskTimeEstimate)
+    ) {
+      throw createError(
+        400,
+        "taskTimeEstimate must be a positive number (minutes)"
+      );
+    }
+    if (taskTimeEstimate > 10080) {
+      // 1 week in minutes
+      throw createError(
+        400,
+        "taskTimeEstimate cannot exceed 10080 minutes (1 week)"
+      );
+    }
+  }
+
+  // Validate taskTimeActual if provided (in minutes)
+  if (taskTimeActual !== undefined) {
+    if (typeof taskTimeActual !== "number" || taskTimeActual < 0) {
+      throw createError(
+        400,
+        "taskTimeActual must be a non-negative number (minutes)"
+      );
+    }
+    if (taskTimeActual > 10080) {
+      throw createError(
+        400,
+        "taskTimeActual cannot exceed 10080 minutes (1 week)"
+      );
+    }
+  }
+
   const newTask = {
-    courseId,
-    taskDescription,
+    courseId: sanitizeString(courseId),
+    taskDescription: sanitizedDescription,
     taskDifficultyRating,
     taskTimeEstimate,
     taskTimeActual,
     userId,
   };
+
+  // Remove undefined fields
+  Object.keys(newTask).forEach(
+    (key) => newTask[key] === undefined && delete newTask[key]
+  );
 
   const db = getDatabase().db();
   const result = await db.collection("tasks").insertOne(newTask);
@@ -83,8 +158,91 @@ exports.updateTask = async (req, res) => {
     throw createError(400, "Invalid task ID");
   }
 
-  const updateDoc = { ...req.body };
-  delete updateDoc._id;
+  const {
+    courseId,
+    taskDescription,
+    taskDifficultyRating,
+    taskTimeEstimate,
+    taskTimeActual,
+    userId,
+  } = req.body;
+  const updateDoc = {};
+
+  // Validate courseId if provided
+  if (courseId !== undefined) {
+    if (typeof courseId !== "string" || courseId.trim().length === 0) {
+      throw createError(400, "courseId must be a non-empty string");
+    }
+    updateDoc.courseId = sanitizeString(courseId);
+  }
+
+  // Validate taskDescription if provided
+  if (taskDescription !== undefined) {
+    if (typeof taskDescription !== "string") {
+      throw createError(400, "taskDescription must be a string");
+    }
+    const sanitized = sanitizeString(taskDescription);
+    if (sanitized.length < 3 || sanitized.length > 500) {
+      throw createError(
+        400,
+        "taskDescription must be between 3 and 500 characters"
+      );
+    }
+    updateDoc.taskDescription = sanitized;
+  }
+
+  // Validate taskDifficultyRating if provided
+  if (taskDifficultyRating !== undefined) {
+    if (!isValidRating(taskDifficultyRating)) {
+      throw createError(
+        400,
+        "taskDifficultyRating must be an integer between 1 and 5"
+      );
+    }
+    updateDoc.taskDifficultyRating = taskDifficultyRating;
+  }
+
+  // Validate taskTimeEstimate if provided
+  if (taskTimeEstimate !== undefined) {
+    if (
+      typeof taskTimeEstimate !== "number" ||
+      !isPositiveNumber(taskTimeEstimate)
+    ) {
+      throw createError(
+        400,
+        "taskTimeEstimate must be a positive number (minutes)"
+      );
+    }
+    if (taskTimeEstimate > 10080) {
+      throw createError(
+        400,
+        "taskTimeEstimate cannot exceed 10080 minutes (1 week)"
+      );
+    }
+    updateDoc.taskTimeEstimate = taskTimeEstimate;
+  }
+
+  // Validate taskTimeActual if provided
+  if (taskTimeActual !== undefined) {
+    if (typeof taskTimeActual !== "number" || taskTimeActual < 0) {
+      throw createError(
+        400,
+        "taskTimeActual must be a non-negative number (minutes)"
+      );
+    }
+    if (taskTimeActual > 10080) {
+      throw createError(
+        400,
+        "taskTimeActual cannot exceed 10080 minutes (1 week)"
+      );
+    }
+    updateDoc.taskTimeActual = taskTimeActual;
+  }
+
+  // Add userId if provided
+  if (userId !== undefined) {
+    updateDoc.userId = userId;
+  }
 
   if (Object.keys(updateDoc).length === 0) {
     throw createError(400, "No valid fields to update");

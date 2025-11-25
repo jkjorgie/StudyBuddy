@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user");
 const { handleRouteError } = require("./handleError");
+const isAuthenticated = require("../middleware/authenticate");
 
 // GET /user
 router.get("/", async (req, res) => {
@@ -23,7 +24,7 @@ router.get("/:userId", async (req, res) => {
 });
 
 // POST /user
-router.post("/", async (req, res) => {
+router.post("/", isAuthenticated, async (req, res) => {
   try {
     await userController.createUser(req, res);
   } catch (err) {
@@ -32,7 +33,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT /user/:userId
-router.put("/:userId", async (req, res) => {
+router.put("/:userId", isAuthenticated, async (req, res) => {
   try {
     await userController.updateUser(req, res);
   } catch (err) {
@@ -41,7 +42,7 @@ router.put("/:userId", async (req, res) => {
 });
 
 // DELETE /user/:userId
-router.delete("/:userId", async (req, res) => {
+router.delete("/:userId", isAuthenticated, async (req, res) => {
   try {
     await userController.deleteUser(req, res);
   } catch (err) {

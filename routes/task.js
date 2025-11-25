@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const taskController = require("../controllers/task");
 const { handleRouteError } = require("./handleError");
+const isAuthenticated = require("../middleware/authenticate");
 
 // GET /task
 router.get("/", async (req, res) => {
@@ -32,7 +33,7 @@ router.get("/:taskId", async (req, res) => {
 });
 
 // POST /task
-router.post("/", async (req, res) => {
+router.post("/", isAuthenticated, async (req, res) => {
   try {
     await taskController.createTask(req, res);
   } catch (err) {
@@ -41,7 +42,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT /task/:taskId
-router.put("/:taskId", async (req, res) => {
+router.put("/:taskId", isAuthenticated, async (req, res) => {
   try {
     await taskController.updateTask(req, res);
   } catch (err) {
@@ -50,7 +51,7 @@ router.put("/:taskId", async (req, res) => {
 });
 
 // DELETE /task/:taskId
-router.delete("/:taskId", async (req, res) => {
+router.delete("/:taskId", isAuthenticated, async (req, res) => {
   try {
     await taskController.deleteTask(req, res);
   } catch (err) {

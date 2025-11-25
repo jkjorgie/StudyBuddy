@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const studySessionController = require("../controllers/study-session");
 const { handleRouteError } = require("./handleError");
+const isAuthenticated = require("../middleware/authenticate");
 
 // GET /study-session
 router.get("/", async (req, res) => {
@@ -23,7 +24,7 @@ router.get("/:sessionId", async (req, res) => {
 });
 
 // POST /study-session
-router.post("/", async (req, res) => {
+router.post("/", isAuthenticated, async (req, res) => {
   try {
     await studySessionController.createStudySession(req, res);
   } catch (err) {
@@ -32,7 +33,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT /study-session/:sessionId
-router.put("/:sessionId", async (req, res) => {
+router.put("/:sessionId", isAuthenticated, async (req, res) => {
   try {
     await studySessionController.updateStudySession(req, res);
   } catch (err) {
@@ -41,7 +42,7 @@ router.put("/:sessionId", async (req, res) => {
 });
 
 // DELETE /study-session/:sessionId
-router.delete("/:sessionId", async (req, res) => {
+router.delete("/:sessionId", isAuthenticated, async (req, res) => {
   try {
     await studySessionController.deleteStudySession(req, res);
   } catch (err) {
