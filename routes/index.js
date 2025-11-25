@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const isAuthenticated = require("../middleware/authenticate");
 
 router.use("/api-docs", require("./swagger"));
 
@@ -27,13 +28,16 @@ router.get("/logout", function (req, res, next) {
     if (err) {
       return next(err);
     }
-    res.redirect("/");
+    // Destroy the session completely
+    req.session.destroy(function (err) {
+      if (err) {
+        return next(err);
+      }
+      // Clear the session cookie
+      res.clearCookie("connect.sid");
+      res.redirect("/");
+    });
   });
-});
-
-router.get("/logout", (req, res) => {
-  req.logout();
-  res.redirect("/");
 });
 
 module.exports = router;

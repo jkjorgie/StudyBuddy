@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const courseController = require("../controllers/course");
 const { handleRouteError } = require("./handleError");
+const isAuthenticated = require("../middleware/authenticate");
 
 // GET /course
 router.get("/", async (req, res) => {
@@ -23,7 +24,7 @@ router.get("/:courseId", async (req, res) => {
 });
 
 // POST /course
-router.post("/", async (req, res) => {
+router.post("/", isAuthenticated, async (req, res) => {
   try {
     await courseController.createCourse(req, res);
   } catch (err) {
@@ -32,7 +33,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT /course/:courseId
-router.put("/:courseId", async (req, res) => {
+router.put("/:courseId", isAuthenticated, async (req, res) => {
   try {
     await courseController.updateCourse(req, res);
   } catch (err) {
@@ -41,7 +42,7 @@ router.put("/:courseId", async (req, res) => {
 });
 
 // DELETE /course/:courseId
-router.delete("/:courseId", async (req, res) => {
+router.delete("/:courseId", isAuthenticated, async (req, res) => {
   try {
     await courseController.deleteCourse(req, res);
   } catch (err) {

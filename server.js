@@ -12,16 +12,11 @@ const cors = require("cors");
 
 // middlewares
 app.use(bodyParser.json());
-app.use(cors({ origin: "*", methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"] }));
-
-// mount all API routes
-app.use("/", routes);
-/*
 app.use(
   session({
     secret: "secret",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
   })
 );
 app.use(passport.initialize());
@@ -41,11 +36,10 @@ app.use((req, res, next) => {
 app.use(cors({ methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"] }));
 app.use(cors({ origin: "*" }));
 
-//routes
+// mount all API routes
 app.use("/", routes);
 
 //passport
-
 passport.use(
   new GitHubStrategy(
     {
@@ -84,7 +78,6 @@ app.get(
     res.redirect("/");
   }
 );
-*/
 
 // Start server
 mongodb.initDb((err) => {

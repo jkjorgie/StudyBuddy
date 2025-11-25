@@ -1,7 +1,12 @@
 // controllers/course.js
 const { getDatabase } = require("../data/database");
 const { ObjectId } = require("mongodb");
-const { createError } = require("./utils");
+const {
+  createError,
+  isValidDate,
+  isNonEmptyArray,
+  sanitizeString,
+} = require("./utils");
 
 // GET /course
 exports.getAllCourses = async (req, res) => {
@@ -43,20 +48,76 @@ exports.createCourse = async (req, res) => {
     userId,
   } = req.body;
 
+  // Validate required fields
   if (!courseName || !startDate || !endDate) {
     throw createError(400, "courseName, startDate, and endDate are required");
   }
 
+  // Validate data types
+  if (typeof courseName !== "string") {
+    throw createError(400, "courseName must be a string");
+  }
+
+  // Sanitize strings
+  const sanitizedCourseName = sanitizeString(courseName);
+  if (sanitizedCourseName.length < 2 || sanitizedCourseName.length > 200) {
+    throw createError(400, "courseName must be between 2 and 200 characters");
+  }
+
+  // Validate dates
+  if (!isValidDate(startDate)) {
+    throw createError(
+      400,
+      "startDate must be a valid date in YYYY-MM-DD format"
+    );
+  }
+  if (!isValidDate(endDate)) {
+    throw createError(400, "endDate must be a valid date in YYYY-MM-DD format");
+  }
+
+  // Validate date logic
+  if (new Date(startDate) >= new Date(endDate)) {
+    throw createError(400, "endDate must be after startDate");
+  }
+
+  // Validate courseSchedule if provided
+  if (courseSchedule !== undefined) {
+    if (!isNonEmptyArray(courseSchedule)) {
+      throw createError(400, "courseSchedule must be a non-empty array");
+    }
+    const validDays = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ];
+    for (const day of courseSchedule) {
+      if (!validDays.includes(day)) {
+        throw createError(400, `Invalid day in courseSchedule: ${day}`);
+      }
+    }
+  }
+
   const newCourse = {
-    courseName,
-    courseDescription,
+    courseName: sanitizedCourseName,
+    courseDescription: courseDescription
+      ? sanitizeString(courseDescription)
+      : undefined,
     courseSchedule,
-    instructorName,
-    subject,
+    instructorName: instructorName ? sanitizeString(instructorName) : undefined,
+    subject: subject ? sanitizeString(subject) : undefined,
     startDate,
     endDate,
     userId,
   };
+
+  // Remove undefined fields
+  Object.keys(newCourse).forEach(
+    (key) => newCourse[key] === undefined && delete newCourse[key]
+  );
 
   const db = getDatabase().db();
   const result = await db.collection("courses").insertOne(newCourse);
@@ -72,8 +133,87 @@ exports.updateCourse = async (req, res) => {
     throw createError(400, "Invalid course ID");
   }
 
-  const updateDoc = { ...req.body };
-  delete updateDoc._id;
+  const {
+    courseName,
+    courseDescription,
+    courseSchedule,
+    instructorName,
+    subject,
+    startDate,
+    endDate,
+    userId,
+  } = req.body;
+  const updateDoc = {};
+
+  // Validate and add courseName if provided
+  if (courseName !== undefined) {
+    if (typeof courseName !== "string") {
+      throw createError(400, "courseName must be a string");
+    }
+    const sanitized = sanitizeString(courseName);
+    if (sanitized.length < 2 || sanitized.length > 200) {
+      throw createError(400, "courseName must be between 2 and 200 characters");
+    }
+    updateDoc.courseName = sanitized;
+  }
+
+  // Validate dates if provided
+  if (startDate !== undefined) {
+    if (!isValidDate(startDate)) {
+      throw createError(
+        400,
+        "startDate must be a valid date in YYYY-MM-DD format"
+      );
+    }
+    updateDoc.startDate = startDate;
+  }
+
+  if (endDate !== undefined) {
+    if (!isValidDate(endDate)) {
+      throw createError(
+        400,
+        "endDate must be a valid date in YYYY-MM-DD format"
+      );
+    }
+    updateDoc.endDate = endDate;
+  }
+
+  // Validate date logic if both are being updated
+  if (updateDoc.startDate && updateDoc.endDate) {
+    if (new Date(updateDoc.startDate) >= new Date(updateDoc.endDate)) {
+      throw createError(400, "endDate must be after startDate");
+    }
+  }
+
+  // Validate courseSchedule if provided
+  if (courseSchedule !== undefined) {
+    if (!isNonEmptyArray(courseSchedule)) {
+      throw createError(400, "courseSchedule must be a non-empty array");
+    }
+    const validDays = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ];
+    for (const day of courseSchedule) {
+      if (!validDays.includes(day)) {
+        throw createError(400, `Invalid day in courseSchedule: ${day}`);
+      }
+    }
+    updateDoc.courseSchedule = courseSchedule;
+  }
+
+  // Add other optional fields with sanitization
+  if (courseDescription !== undefined)
+    updateDoc.courseDescription = sanitizeString(courseDescription);
+  if (instructorName !== undefined)
+    updateDoc.instructorName = sanitizeString(instructorName);
+  if (subject !== undefined) updateDoc.subject = sanitizeString(subject);
+  if (userId !== undefined) updateDoc.userId = userId;
 
   if (Object.keys(updateDoc).length === 0) {
     throw createError(400, "No valid fields to update");
