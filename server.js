@@ -1,4 +1,4 @@
-//server.js
+// server.js
 const express = require("express");
 const mongodb = require("./data/database");
 const app = express();
@@ -10,17 +10,8 @@ const session = require("express-session");
 const GitHubStrategy = require("passport-github2").Strategy;
 const cors = require("cors");
 
-// middlewares
+// Common middlewares (used in ALL environments)
 app.use(bodyParser.json());
-app.use(
-  session({
-    secret: "secret",
-    resave: false,
-    saveUninitialized: false,
-  })
-);
-app.use(passport.initialize());
-app.use(passport.session());
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -36,62 +27,82 @@ app.use((req, res, next) => {
 app.use(cors({ methods: ["GET", "POST", "DELETE", "UPDATE", "PUT", "PATCH"] }));
 app.use(cors({ origin: "*" }));
 
-// mount all API routes
+// Auth / session / GitHub routes: ONLY when NOT in test
+if (process.env.NODE_ENV !== "test") {
+  // Sessions
+  app.use(
+    session({
+      secret: "secret",
+      resave: false,
+      saveUninitialized: false,
+    })
+  );
+
+  // Passport
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  passport.use(
+    new GitHubStrategy(
+      {
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: process.env.CALLBACK_URL,
+      },
+      function (accessToken, refreshToken, profile, done) {
+        return done(null, profile);
+      }
+    )
+  );
+
+  passport.serializeUser((user, done) => {
+    done(null, user);
+  });
+  passport.deserializeUser((user, done) => {
+    done(null, user);
+  });
+
+  // Root route showing login state (this will override the JSON "/" from routes)
+  app.get("/", (req, res) => {
+    res.send(
+      req.session.user !== undefined
+        ? `Logged in as ${req.session.user.displayName}`
+        : "Logged out"
+    );
+  });
+
+  // GitHub OAuth callback route
+  app.get(
+    "/github/callback",
+    passport.authenticate("github", {
+      failureRedirect: "/api-docs",
+      session: false,
+    }),
+    (req, res) => {
+      req.session.user = req.user;
+      res.redirect("/");
+    }
+  );
+}
+
+// Mount all API routes (used in ALL environments)
 app.use("/", routes);
 
-//passport
-passport.use(
-  new GitHubStrategy(
-    {
-      clientID: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: process.env.CALLBACK_URL,
-    },
-    function (accessToken, refreshToken, profile, done) {
-      return done(null, profile);
+// Start server ONLY outside tests
+if (process.env.NODE_ENV !== "test") {
+  mongodb.initDb((err) => {
+    if (err) {
+      console.log(err);
+    } else {
+      app.listen(port, () => {
+        console.log(`Study Buddy API listening on port ${port}`);
+        console.log(`Server running at http://localhost:${port}`);
+      });
+
+      // Ping database to verify connection
+      mongodb.pingDatabase();
     }
-  )
-);
-
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
-
-app.get("/", (req, res) => {
-  res.send(
-    req.session.user !== undefined
-      ? `Logged in as ${req.session.user.displayName}`
-      : "Logged out"
-  );
-});
-app.get(
-  "/github/callback",
-  passport.authenticate("github", {
-    failureRedirect: "/api-docs",
-    session: false,
-  }),
-  (req, res) => {
-    req.session.user = req.user;
-    res.redirect("/");
-  }
-);
-
-// Start server
-mongodb.initDb((err) => {
-  if (err) {
-    console.log(err);
-  } else {
-    app.listen(port, () => {
-      console.log(`Study Buddy API listening on port ${port}`);
-      console.log(`Server running at http://localhost:${port}`);
-    });
-
-    // Ping database to verify connection
-    mongodb.pingDatabase();
-  }
-});
+  });
+}
 
 module.exports = app;
