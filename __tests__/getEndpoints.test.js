@@ -25,8 +25,7 @@ describe("GET endpoints", () => {
         collection: (name) => ({
           // this is the users collection used in controller
           find: () => ({
-            toArray: async () =>
-              name === "users" ? fakeUsers : [], // only return users on the "users" collection
+            toArray: async () => (name === "users" ? fakeUsers : []), // only return users on the "users" collection
           }),
         }),
       }),
@@ -60,8 +59,7 @@ describe("GET endpoints", () => {
       db: () => ({
         collection: (name) => ({
           find: () => ({
-            toArray: async () =>
-              name === "courses" ? fakeCourses : [],
+            toArray: async () => (name === "courses" ? fakeCourses : []),
           }),
         }),
       }),
@@ -136,8 +134,7 @@ describe("GET endpoints", () => {
       db: () => ({
         collection: (name) => ({
           find: () => ({
-            toArray: async () =>
-              name === "tasks" ? fakeTasks : [],
+            toArray: async () => (name === "tasks" ? fakeTasks : []),
           }),
         }),
       }),
@@ -149,5 +146,109 @@ describe("GET endpoints", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(fakeTasks);
+  });
+
+  // Tests for specific ID endpoints
+  describe("GET endpoints by ID", () => {
+    test("GET /user/:userId returns 200 and user when found", async () => {
+      const fakeUser = {
+        _id: "691e9c6c334999dee4d5d70e",
+        name: "John Smith",
+        emailAddress: "john.smith@example.com",
+      };
+
+      const mockDbClient = {
+        db: () => ({
+          collection: (name) => ({
+            findOne: async () => (name === "users" ? fakeUser : null),
+          }),
+        }),
+      };
+
+      getDatabase.mockReturnValue(mockDbClient);
+
+      const res = await request(app).get("/user/691e9c6c334999dee4d5d70e");
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(fakeUser);
+    });
+
+    test("GET /course/:courseId returns 200 and course when found", async () => {
+      const fakeCourse = {
+        _id: "691e9cd6334999dee4d5d712",
+        courseName: "Intro to Computer Science",
+        startDate: "2025-01-15",
+        endDate: "2025-05-10",
+      };
+
+      const mockDbClient = {
+        db: () => ({
+          collection: (name) => ({
+            findOne: async () => (name === "courses" ? fakeCourse : null),
+          }),
+        }),
+      };
+
+      getDatabase.mockReturnValue(mockDbClient);
+
+      const res = await request(app).get("/course/507f1f77bcf86cd799439012");
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(fakeCourse);
+    });
+
+    test("GET /task/:taskId returns 200 and task when found", async () => {
+      const fakeTask = {
+        _id: "507f1f77bcf86cd799439013",
+        courseId: "10",
+        taskDescription: "Linked list assignment",
+        taskDifficultyRating: 3,
+        taskTimeEstimate: 180,
+        taskTimeActual: 200,
+      };
+
+      const mockDbClient = {
+        db: () => ({
+          collection: (name) => ({
+            findOne: async () => (name === "tasks" ? fakeTask : null),
+          }),
+        }),
+      };
+
+      getDatabase.mockReturnValue(mockDbClient);
+
+      const res = await request(app).get("/task/507f1f77bcf86cd799439013");
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(fakeTask);
+    });
+
+    test("GET /study-session/:sessionId returns 200 and session when found", async () => {
+      const fakeSession = {
+        _id: "507f1f77bcf86cd799439014",
+        courseId: "10",
+        length: 120,
+        description: "Recursion practice",
+        studySessionRating: 4,
+      };
+
+      const mockDbClient = {
+        db: () => ({
+          collection: (name) => ({
+            findOne: async () =>
+              name === "study_sessions" ? fakeSession : null,
+          }),
+        }),
+      };
+
+      getDatabase.mockReturnValue(mockDbClient);
+
+      const res = await request(app).get(
+        "/study-session/507f1f77bcf86cd799439014"
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(fakeSession);
+    });
   });
 });
